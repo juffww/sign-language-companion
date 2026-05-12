@@ -1,0 +1,18 @@
+[Unit]
+Description=Sign Language Pi Streamer
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/pi_client
+Environment="BACKEND_WS_URL=wss://YOUR-TUNNEL.trycloudflare.com/ws/pi/pi-01?token=change-me"
+Environment="USE_PICAM=1"
+Environment="TARGET_FPS=15"
+ExecStart=/usr/bin/python3 /home/pi/pi_client/stream.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

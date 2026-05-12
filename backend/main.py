@@ -1,10 +1,12 @@
-"""FastAPI entry point.
+"""FastAPI entry point — khớp flow record→predict của live_test_with_velocity.py.
 
 Endpoints:
-  GET  /health                — liveness
-  POST /predict               — single-shot: send 60 JPEG frames as multipart, get prediction
-  WS   /ws/client             — browser webcam stream, JSON {type:'frame', jpeg_b64}
-  WS   /ws/pi/{device_id}     — Pi raw JPEG binary frames
+  GET  /health                  — liveness
+  POST /predict                 — gửi N JPEG frames (multipart) → 1 prediction
+  WS   /ws/client               — browser stream:
+        client gửi {type:'frame', jpeg_b64} liên tục,
+        khi muốn dự đoán → gửi {type:'predict'} hoặc {type:'reset'}
+  WS   /ws/pi/{device_id}       — Pi raw JPEG bytes; gửi text 'predict' / 'reset' để điều khiển
 """
 from __future__ import annotations
 import base64
@@ -14,9 +16,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from config import settings
-from inference.pipeline import SignSession
+from inference.pipeline import SignSession, MIN_FRAMES
 
-app = FastAPI(title="Sign Language Recognition API", version="1.0.0")
+app = FastAPI(title="Sign Language Recognition API", version="1.1.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -29,28 +31,27 @@ app.add_middleware(
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "seq_len": settings.SEQ_LEN}
+    return {"status": "ok", "min_frames": MIN_FRAMES}
 
 
 @app.post("/predict")
 async def predict_batch(files: list[UploadFile] = File(...)):
-    """Send N JPEG frames in order. Returns prediction once buffer is full."""
-    if len(files) < settings.SEQ_LEN:
-        raise HTTPException(400, f"need at least {settings.SEQ_LEN} frames, got {len(files)}")
+    """Gửi N JPEG frames theo thứ tự (N >= 8). Trả về 1 prediction."""
+    if len(files) < MIN_FRAMES:
+        raise HTTPException(400, f"need at least {MIN_FRAMES} frames, got {len(files)}")
     sess = SignSession()
     try:
-        result = None
-        for f in files[-settings.SEQ_LEN:]:
+        for f in files:
             data = await f.read()
-            result = await sess.push_jpeg(data)
-        return JSONResponse(result or {"status": "no_result"})
+            await sess.push_jpeg(data)
+        result = await sess.predict()
+        return JSONResponse(result)
     finally:
         sess.close()
 
 
 @app.websocket("/ws/client")
 async def ws_client(ws: WebSocket):
-    """Browser webcam: send {'type':'frame','jpeg_b64':'...'} per frame."""
     await ws.accept()
     sess = SignSession()
     try:
@@ -60,12 +61,19 @@ async def ws_client(ws: WebSocket):
                 payload = json.loads(msg)
             except Exception:
                 continue
-            if payload.get("type") != "frame":
-                continue
-            jpeg = base64.b64decode(payload["jpeg_b64"])
-            result = await sess.push_jpeg(jpeg)
-            if result:
+            t = payload.get("type")
+            if t == "frame":
+                jpeg = base64.b64decode(payload["jpeg_b64"])
+                status = await sess.push_jpeg(jpeg)
+                if status:
+                    await ws.send_json(status)
+            elif t == "predict":
+                result = await sess.predict()
                 await ws.send_json(result)
+                sess.reset()
+            elif t == "reset":
+                sess.reset()
+                await ws.send_json({"status": "reset"})
     except WebSocketDisconnect:
         pass
     finally:
@@ -74,7 +82,6 @@ async def ws_client(ws: WebSocket):
 
 @app.websocket("/ws/pi/{device_id}")
 async def ws_pi(ws: WebSocket, device_id: str, token: str = Query("")):
-    """Raspberry Pi: raw JPEG bytes per message."""
     if settings.PI_SHARED_TOKEN and token != settings.PI_SHARED_TOKEN:
         await ws.close(code=4401)
         return
@@ -82,10 +89,20 @@ async def ws_pi(ws: WebSocket, device_id: str, token: str = Query("")):
     sess = SignSession()
     try:
         while True:
-            jpeg = await ws.receive_bytes()
-            result = await sess.push_jpeg(jpeg)
-            if result:
-                await ws.send_json({"device_id": device_id, **result})
+            msg = await ws.receive()
+            if "bytes" in msg and msg["bytes"] is not None:
+                status = await sess.push_jpeg(msg["bytes"])
+                if status:
+                    await ws.send_json({"device_id": device_id, **status})
+            elif "text" in msg and msg["text"]:
+                cmd = msg["text"].strip().lower()
+                if cmd == "predict":
+                    result = await sess.predict()
+                    await ws.send_json({"device_id": device_id, **result})
+                    sess.reset()
+                elif cmd == "reset":
+                    sess.reset()
+                    await ws.send_json({"device_id": device_id, "status": "reset"})
     except WebSocketDisconnect:
         pass
     finally:

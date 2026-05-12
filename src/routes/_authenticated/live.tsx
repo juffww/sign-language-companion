@@ -22,6 +22,13 @@ interface PredResult {
   top3: Array<[string, number]>;
 }
 
+interface BackendResult {
+  word: string;
+  confidence: number;
+  top3: Array<{ word: string; confidence: number }>;
+  accepted?: boolean;
+}
+
 function LivePage() {
   const { user } = useAuth();
   const videoRef = useRef<HTMLVideoElement>(null);

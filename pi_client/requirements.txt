@@ -1,0 +1,5 @@
+opencv-python-headless==4.10.0.84
+websockets==13.0
+numpy==1.26.4
+# Pi camera (Bullseye/Bookworm). Bỏ dòng dưới nếu dùng USB webcam:
+picamera2; platform_machine=="aarch64"

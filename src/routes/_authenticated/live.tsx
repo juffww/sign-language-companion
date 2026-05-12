@@ -22,6 +22,13 @@ interface PredResult {
   top3: Array<[string, number]>;
 }
 
+interface BackendResult {
+  word: string;
+  confidence: number;
+  top3: Array<{ word: string; confidence: number }>;
+  accepted?: boolean;
+}
+
 function LivePage() {
   const { user } = useAuth();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -128,10 +135,15 @@ function LivePage() {
     setBusy(true);
     try {
       const fd = new FormData();
-      frames.forEach((b, i) => fd.append("frames", b, `frame_${i}.jpg`));
-      const res = await fetch(`${apiUrl}/api/predict`, { method: "POST", body: fd });
-      if (!res.ok) throw new Error(`Backend ${res.status}`);
-      const json = (await res.json()) as PredResult;
+      frames.forEach((b, i) => fd.append("files", b, `frame_${i}.jpg`));
+      const res = await fetch(`${apiUrl}/predict`, { method: "POST", body: fd });
+      if (!res.ok) throw new Error(`Backend ${res.status}: ${await res.text()}`);
+      const raw = (await res.json()) as BackendResult;
+      const json: PredResult = {
+        word: raw.word,
+        conf: raw.confidence * (raw.confidence <= 1 ? 100 : 1),
+        top3: (raw.top3 || []).map((t) => [t.word, t.confidence * (t.confidence <= 1 ? 100 : 1)] as [string, number]),
+      };
       setPredictions((p) => [...p, json].slice(-10));
 
       const sid = await ensureSession();

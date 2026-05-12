@@ -14,16 +14,250 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      lesson_attempts: {
+        Row: {
+          confidence: number | null
+          created_at: string
+          id: string
+          is_correct: boolean
+          predicted_word: string | null
+          target_word: string
+          top3: Json | null
+          user_id: string
+          vocabulary_id: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          predicted_word?: string | null
+          target_word: string
+          top3?: Json | null
+          user_id: string
+          vocabulary_id: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          predicted_word?: string | null
+          target_word?: string
+          top3?: Json | null
+          user_id?: string
+          vocabulary_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_attempts_vocabulary_id_fkey"
+            columns: ["vocabulary_id"]
+            isOneToOne: false
+            referencedRelation: "vocabularies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      predictions: {
+        Row: {
+          confidence: number
+          created_at: string
+          id: string
+          session_id: string
+          top3: Json | null
+          user_id: string
+          word: string
+        }
+        Insert: {
+          confidence: number
+          created_at?: string
+          id?: string
+          session_id: string
+          top3?: Json | null
+          user_id: string
+          word: string
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          id?: string
+          session_id?: string
+          top3?: Json | null
+          user_id?: string
+          word?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "predictions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sessions: {
+        Row: {
+          avg_confidence: number | null
+          device_id: string | null
+          ended_at: string | null
+          id: string
+          source: Database["public"]["Enums"]["session_source"]
+          started_at: string
+          user_id: string
+          word_count: number
+        }
+        Insert: {
+          avg_confidence?: number | null
+          device_id?: string | null
+          ended_at?: string | null
+          id?: string
+          source?: Database["public"]["Enums"]["session_source"]
+          started_at?: string
+          user_id: string
+          word_count?: number
+        }
+        Update: {
+          avg_confidence?: number | null
+          device_id?: string | null
+          ended_at?: string | null
+          id?: string
+          source?: Database["public"]["Enums"]["session_source"]
+          started_at?: string
+          user_id?: string
+          word_count?: number
+        }
+        Relationships: []
+      }
+      user_progress: {
+        Row: {
+          correct_count: number
+          id: string
+          last_attempt_at: string | null
+          mastery: number
+          total_count: number
+          user_id: string
+          vocabulary_id: string
+        }
+        Insert: {
+          correct_count?: number
+          id?: string
+          last_attempt_at?: string | null
+          mastery?: number
+          total_count?: number
+          user_id: string
+          vocabulary_id: string
+        }
+        Update: {
+          correct_count?: number
+          id?: string
+          last_attempt_at?: string | null
+          mastery?: number
+          total_count?: number
+          user_id?: string
+          vocabulary_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_progress_vocabulary_id_fkey"
+            columns: ["vocabulary_id"]
+            isOneToOne: false
+            referencedRelation: "vocabularies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vocabularies: {
+        Row: {
+          created_at: string
+          description: string | null
+          difficulty: number
+          id: string
+          video_url: string | null
+          word: string
+          word_index: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          difficulty?: number
+          id?: string
+          video_url?: string | null
+          word: string
+          word_index: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          difficulty?: number
+          id?: string
+          video_url?: string | null
+          word?: string
+          word_index?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
+      session_source: "pi" | "webcam"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +384,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+      session_source: ["pi", "webcam"],
+    },
   },
 } as const

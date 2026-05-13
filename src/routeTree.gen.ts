@@ -18,12 +18,8 @@ import { Route as AuthenticatedLiveRouteImport } from './routes/_authenticated/l
 import { Route as AuthenticatedLearnRouteImport } from './routes/_authenticated/learn'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 import { Route as AuthenticatedLearnIndexRouteImport } from './routes/_authenticated/learn.index'
-import { Route as AuthenticatedLearnWordIdRouteImport } from './routes/_authenticated/learn.$wordId'
+import { Route as AuthenticatedLearnWordIdRouteImport } from './routes/_authenticated/learn_.$wordId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -87,7 +83,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/history': typeof AuthenticatedHistoryRoute
-  '/learn': typeof AuthenticatedLearnRoute
+  '/learn': typeof AuthenticatedLearnRouteWithChildren
   '/live': typeof AuthenticatedLiveRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/learn/$wordId': typeof AuthenticatedLearnWordIdRoute
@@ -99,10 +95,6 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/history': typeof AuthenticatedHistoryRoute
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
   '/live': typeof AuthenticatedLiveRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/learn/$wordId': typeof AuthenticatedLearnWordIdRoute
@@ -116,11 +108,10 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
-  '/_authenticated/learn': typeof AuthenticatedLearnRoute
+  '/_authenticated/learn': typeof AuthenticatedLearnRouteWithChildren
   '/_authenticated/live': typeof AuthenticatedLiveRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
-
-  '/_authenticated/learn/$wordId': typeof AuthenticatedLearnWordIdRoute
+  '/_authenticated/learn_/$wordId': typeof AuthenticatedLearnWordIdRoute
   '/_authenticated/learn/': typeof AuthenticatedLearnIndexRoute
 }
 export interface FileRouteTypes {
@@ -158,8 +149,7 @@ export interface FileRouteTypes {
     | '/_authenticated/learn'
     | '/_authenticated/live'
     | '/_authenticated/profile'
-
-    | '/_authenticated/learn/$wordId'
+    | '/_authenticated/learn_/$wordId'
     | '/_authenticated/learn/'
   fileRoutesById: FileRoutesById
 }
@@ -235,10 +225,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
     '/_authenticated/learn/': {
       id: '/_authenticated/learn/'
       path: '/'
@@ -246,9 +232,9 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLearnIndexRouteImport
       parentRoute: typeof AuthenticatedLearnRoute
     }
-    '/_authenticated/learn/$wordId': {
-      id: '/_authenticated/learn/$wordId'
-      path: '/$wordId'
+    '/_authenticated/learn_/$wordId': {
+      id: '/_authenticated/learn_/$wordId'
+      path: '/learn/$wordId'
       fullPath: '/learn/$wordId'
       preLoaderRoute: typeof AuthenticatedLearnWordIdRouteImport
       parentRoute: typeof AuthenticatedRoute
@@ -257,12 +243,10 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedLearnRouteChildren {
-  AuthenticatedLearnWordIdRoute: typeof AuthenticatedLearnWordIdRoute
   AuthenticatedLearnIndexRoute: typeof AuthenticatedLearnIndexRoute
 }
 
 const AuthenticatedLearnRouteChildren: AuthenticatedLearnRouteChildren = {
-  AuthenticatedLearnWordIdRoute: AuthenticatedLearnWordIdRoute,
   AuthenticatedLearnIndexRoute: AuthenticatedLearnIndexRoute,
 }
 
@@ -272,7 +256,7 @@ const AuthenticatedLearnRouteWithChildren =
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
-  AuthenticatedLearnRoute: typeof AuthenticatedLearnRoute
+  AuthenticatedLearnRoute: typeof AuthenticatedLearnRouteWithChildren
   AuthenticatedLiveRoute: typeof AuthenticatedLiveRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedLearnWordIdRoute: typeof AuthenticatedLearnWordIdRoute
@@ -281,7 +265,7 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
-  AuthenticatedLearnRoute: AuthenticatedLearnRoute,
+  AuthenticatedLearnRoute: AuthenticatedLearnRouteWithChildren,
   AuthenticatedLiveRoute: AuthenticatedLiveRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedLearnWordIdRoute: AuthenticatedLearnWordIdRoute,

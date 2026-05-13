@@ -35,6 +35,7 @@ function LivePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const intervalRef = useRef<number | null>(null);
+  const framesRef = useRef<Blob[]>([]);
 
   const [streaming, setStreaming] = useState(false);
   const [recording, setRecording] = useState(false);
@@ -105,18 +106,18 @@ function LivePage() {
 
   const startRecording = () => {
     if (!streaming) return;
-    const frames: Blob[] = [];
+    framesRef.current = [];
     setFramesCaptured(0);
     setRecording(true);
     intervalRef.current = window.setInterval(() => {
       const blob = captureFrameJpeg();
       if (blob) {
-        frames.push(blob);
-        setFramesCaptured(frames.length);
-        if (frames.length >= FRAMES_NEEDED) {
+        framesRef.current.push(blob);
+        setFramesCaptured(framesRef.current.length);
+        if (framesRef.current.length >= FRAMES_NEEDED) {
           window.clearInterval(intervalRef.current!);
           setRecording(false);
-          void sendFrames(frames);
+          void sendFrames(framesRef.current);
         }
       }
     }, 50); // 20 fps
@@ -125,6 +126,13 @@ function LivePage() {
   const stopRecordingEarly = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     setRecording(false);
+    // Gửi frames đã thu thập được (dù chưa đủ 60)
+    const captured = framesRef.current;
+    if (captured.length >= 8) {
+      void sendFrames(captured);
+    } else {
+      toast.error(`Cần ít nhất 8 frame (mới có ${captured.length}). Hãy giữ lâu hơn.`);
+    }
   };
 
   const sendFrames = async (frames: Blob[]) => {

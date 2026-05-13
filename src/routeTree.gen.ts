@@ -18,7 +18,10 @@ import { Route as AuthenticatedLiveRouteImport } from './routes/_authenticated/l
 import { Route as AuthenticatedLearnRouteImport } from './routes/_authenticated/learn'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 import { Route as AuthenticatedLearnIndexRouteImport } from './routes/_authenticated/learn.index'
 import { Route as AuthenticatedLearnWordIdRouteImport } from './routes/_authenticated/learn.$wordId'
 
@@ -96,7 +99,10 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/history': typeof AuthenticatedHistoryRoute
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
   '/live': typeof AuthenticatedLiveRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/learn/$wordId': typeof AuthenticatedLearnWordIdRoute
@@ -229,7 +235,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
     '/_authenticated/learn/': {
       id: '/_authenticated/learn/'
       path: '/'

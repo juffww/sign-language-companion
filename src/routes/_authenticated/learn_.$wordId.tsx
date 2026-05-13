@@ -19,7 +19,7 @@ const MIN_CONFIDENCE = 60;
 const FRAMES_NEEDED = 60;
 
 function LessonPage() {
-  const { wordId } = useParams({ from: "/_authenticated/learn/$wordId" });
+  const { wordId } = useParams({ from: "/_authenticated/learn_/$wordId" });
   const { user } = useAuth();
 
   const { data: vocab } = useQuery({

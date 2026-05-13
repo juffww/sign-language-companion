@@ -18,7 +18,7 @@ import { Route as AuthenticatedLiveRouteImport } from './routes/_authenticated/l
 import { Route as AuthenticatedLearnRouteImport } from './routes/_authenticated/learn'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
-import { Route as AuthenticatedLearnWordIdRouteImport } from './routes/_authenticated/learn.$wordId'
+import { Route as AuthenticatedLearnWordIdRouteImport } from './routes/_authenticated/learn_.$wordId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -66,9 +66,9 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 } as any)
 const AuthenticatedLearnWordIdRoute =
   AuthenticatedLearnWordIdRouteImport.update({
-    id: '/$wordId',
-    path: '/$wordId',
-    getParentRoute: () => AuthenticatedLearnRoute,
+    id: '/learn_/$wordId',
+    path: '/learn/$wordId',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -77,7 +77,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/history': typeof AuthenticatedHistoryRoute
-  '/learn': typeof AuthenticatedLearnRouteWithChildren
+  '/learn': typeof AuthenticatedLearnRoute
   '/live': typeof AuthenticatedLiveRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/learn/$wordId': typeof AuthenticatedLearnWordIdRoute
@@ -88,7 +88,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/history': typeof AuthenticatedHistoryRoute
-  '/learn': typeof AuthenticatedLearnRouteWithChildren
+  '/learn': typeof AuthenticatedLearnRoute
   '/live': typeof AuthenticatedLiveRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/learn/$wordId': typeof AuthenticatedLearnWordIdRoute
@@ -101,10 +101,10 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
-  '/_authenticated/learn': typeof AuthenticatedLearnRouteWithChildren
+  '/_authenticated/learn': typeof AuthenticatedLearnRoute
   '/_authenticated/live': typeof AuthenticatedLiveRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
-  '/_authenticated/learn/$wordId': typeof AuthenticatedLearnWordIdRoute
+  '/_authenticated/learn_/$wordId': typeof AuthenticatedLearnWordIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -140,7 +140,7 @@ export interface FileRouteTypes {
     | '/_authenticated/learn'
     | '/_authenticated/live'
     | '/_authenticated/profile'
-    | '/_authenticated/learn/$wordId'
+    | '/_authenticated/learn_/$wordId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -215,41 +215,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/learn/$wordId': {
-      id: '/_authenticated/learn/$wordId'
-      path: '/$wordId'
+    '/_authenticated/learn_/$wordId': {
+      id: '/_authenticated/learn_/$wordId'
+      path: '/learn/$wordId'
       fullPath: '/learn/$wordId'
       preLoaderRoute: typeof AuthenticatedLearnWordIdRouteImport
-      parentRoute: typeof AuthenticatedLearnRoute
+      parentRoute: typeof AuthenticatedRoute
     }
   }
 }
 
-interface AuthenticatedLearnRouteChildren {
-  AuthenticatedLearnWordIdRoute: typeof AuthenticatedLearnWordIdRoute
-}
-
-const AuthenticatedLearnRouteChildren: AuthenticatedLearnRouteChildren = {
-  AuthenticatedLearnWordIdRoute: AuthenticatedLearnWordIdRoute,
-}
-
-const AuthenticatedLearnRouteWithChildren =
-  AuthenticatedLearnRoute._addFileChildren(AuthenticatedLearnRouteChildren)
-
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
-  AuthenticatedLearnRoute: typeof AuthenticatedLearnRouteWithChildren
+  AuthenticatedLearnRoute: typeof AuthenticatedLearnRoute
   AuthenticatedLiveRoute: typeof AuthenticatedLiveRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedLearnWordIdRoute: typeof AuthenticatedLearnWordIdRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
-  AuthenticatedLearnRoute: AuthenticatedLearnRouteWithChildren,
+  AuthenticatedLearnRoute: AuthenticatedLearnRoute,
   AuthenticatedLiveRoute: AuthenticatedLiveRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedLearnWordIdRoute: AuthenticatedLearnWordIdRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

@@ -10,7 +10,7 @@ import { ArrowLeft, Camera, Play, CheckCircle2, XCircle } from "lucide-react";
 import { getFastApiUrl } from "@/lib/fastapi";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/learn/$wordId")({
+export const Route = createFileRoute("/_authenticated/learn_/$wordId")({
   head: () => ({ meta: [{ title: "Luyện tập — SignAI" }] }),
   component: LessonPage,
 });

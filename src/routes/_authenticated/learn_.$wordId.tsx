@@ -10,7 +10,7 @@ import { ArrowLeft, Camera, Play, CheckCircle2, XCircle } from "lucide-react";
 import { getFastApiUrl } from "@/lib/fastapi";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/learn/$wordId")({
+export const Route = createFileRoute("/_authenticated/learn_/$wordId")({
   head: () => ({ meta: [{ title: "Luyện tập — SignAI" }] }),
   component: LessonPage,
 });
@@ -19,7 +19,7 @@ const MIN_CONFIDENCE = 60;
 const FRAMES_NEEDED = 60;
 
 function LessonPage() {
-  const { wordId } = useParams({ from: "/_authenticated/learn/$wordId" });
+  const { wordId } = useParams({ from: "/_authenticated/learn_/$wordId" });
   const { user } = useAuth();
 
   const { data: vocab } = useQuery({

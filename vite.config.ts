@@ -12,4 +12,18 @@ export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
+  vite: {
+    server: {
+      // Exclude backend virtualenv & caches — they contain thousands of files
+      // and blow through Linux's inotify file-watcher limit (ENOSPC error).
+      watch: {
+        ignored: [
+          "**/backend/.venv/**",
+          "**/backend/__pycache__/**",
+          "**/backend/models/**",
+          "**/.git/**",
+        ],
+      },
+    },
+  },
 });

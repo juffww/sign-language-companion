@@ -18,7 +18,9 @@ import { Route as AuthenticatedLiveRouteImport } from './routes/_authenticated/l
 import { Route as AuthenticatedLearnRouteImport } from './routes/_authenticated/learn'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
-import { Route as AuthenticatedLearnWordIdRouteImport } from './routes/_authenticated/learn_.$wordId'
+
+import { Route as AuthenticatedLearnIndexRouteImport } from './routes/_authenticated/learn.index'
+import { Route as AuthenticatedLearnWordIdRouteImport } from './routes/_authenticated/learn.$wordId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -64,6 +66,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedLearnIndexRoute = AuthenticatedLearnIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedLearnRoute,
+} as any)
 const AuthenticatedLearnWordIdRoute =
   AuthenticatedLearnWordIdRouteImport.update({
     id: '/learn_/$wordId',
@@ -81,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/live': typeof AuthenticatedLiveRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/learn/$wordId': typeof AuthenticatedLearnWordIdRoute
+  '/learn/': typeof AuthenticatedLearnIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -88,10 +96,11 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/history': typeof AuthenticatedHistoryRoute
-  '/learn': typeof AuthenticatedLearnRoute
+
   '/live': typeof AuthenticatedLiveRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/learn/$wordId': typeof AuthenticatedLearnWordIdRoute
+  '/learn': typeof AuthenticatedLearnIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -104,7 +113,9 @@ export interface FileRoutesById {
   '/_authenticated/learn': typeof AuthenticatedLearnRoute
   '/_authenticated/live': typeof AuthenticatedLiveRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
-  '/_authenticated/learn_/$wordId': typeof AuthenticatedLearnWordIdRoute
+
+  '/_authenticated/learn/$wordId': typeof AuthenticatedLearnWordIdRoute
+  '/_authenticated/learn/': typeof AuthenticatedLearnIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/live'
     | '/profile'
     | '/learn/$wordId'
+    | '/learn/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -125,10 +137,10 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin'
     | '/history'
-    | '/learn'
     | '/live'
     | '/profile'
     | '/learn/$wordId'
+    | '/learn'
   id:
     | '__root__'
     | '/'
@@ -140,7 +152,9 @@ export interface FileRouteTypes {
     | '/_authenticated/learn'
     | '/_authenticated/live'
     | '/_authenticated/profile'
-    | '/_authenticated/learn_/$wordId'
+
+    | '/_authenticated/learn/$wordId'
+    | '/_authenticated/learn/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -215,15 +229,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/learn_/$wordId': {
-      id: '/_authenticated/learn_/$wordId'
-      path: '/learn/$wordId'
+
+    '/_authenticated/learn/': {
+      id: '/_authenticated/learn/'
+      path: '/'
+      fullPath: '/learn/'
+      preLoaderRoute: typeof AuthenticatedLearnIndexRouteImport
+      parentRoute: typeof AuthenticatedLearnRoute
+    }
+    '/_authenticated/learn/$wordId': {
+      id: '/_authenticated/learn/$wordId'
+      path: '/$wordId'
       fullPath: '/learn/$wordId'
       preLoaderRoute: typeof AuthenticatedLearnWordIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
   }
 }
+
+interface AuthenticatedLearnRouteChildren {
+  AuthenticatedLearnWordIdRoute: typeof AuthenticatedLearnWordIdRoute
+  AuthenticatedLearnIndexRoute: typeof AuthenticatedLearnIndexRoute
+}
+
+const AuthenticatedLearnRouteChildren: AuthenticatedLearnRouteChildren = {
+  AuthenticatedLearnWordIdRoute: AuthenticatedLearnWordIdRoute,
+  AuthenticatedLearnIndexRoute: AuthenticatedLearnIndexRoute,
+}
+
+const AuthenticatedLearnRouteWithChildren =
+  AuthenticatedLearnRoute._addFileChildren(AuthenticatedLearnRouteChildren)
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
@@ -256,3 +291,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

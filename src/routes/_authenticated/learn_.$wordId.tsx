@@ -101,21 +101,32 @@ function LessonPage() {
     setBusy(true);
     try {
       const fd = new FormData();
-      frames.forEach((b, i) => fd.append("frames", b, `f_${i}.jpg`));
-      const res = await fetch(`${getFastApiUrl()}/api/predict`, { method: "POST", body: fd });
+      // Backend POST /predict expects field name "files"
+      frames.forEach((b, i) => fd.append("files", b, `f_${i}.jpg`));
+      const res = await fetch(`${getFastApiUrl()}/predict`, { method: "POST", body: fd });
       if (!res.ok) throw new Error(`Backend ${res.status}`);
-      const json = (await res.json()) as { word: string; conf: number; top3: Array<[string, number]> };
-      const correct = json.word.toLowerCase() === vocab.word.toLowerCase() && json.conf >= MIN_CONFIDENCE;
-      setResult({ ...json, correct });
+      const raw = (await res.json()) as {
+        word: string;
+        confidence: number;
+        top3: Array<{ word: string; confidence: number }>;
+      };
+      // Normalise confidence: backend returns 0-1 float, UI expects 0-100
+      const conf = raw.confidence <= 1 ? raw.confidence * 100 : raw.confidence;
+      const top3: Array<[string, number]> = (raw.top3 ?? []).map((t) => [
+        t.word,
+        t.confidence <= 1 ? t.confidence * 100 : t.confidence,
+      ]);
+      const correct = raw.word.toLowerCase() === vocab.word.toLowerCase() && conf >= MIN_CONFIDENCE;
+      setResult({ word: raw.word, conf, correct, top3 });
 
       await supabase.from("lesson_attempts").insert({
         user_id: user!.id,
         vocabulary_id: vocab.id,
         target_word: vocab.word,
-        predicted_word: json.word,
-        confidence: json.conf,
+        predicted_word: raw.word,
+        confidence: conf,
         is_correct: correct,
-        top3: json.top3,
+        top3: top3,
       });
     } catch (e) {
       toast.error("Lỗi backend: " + (e as Error).message);
